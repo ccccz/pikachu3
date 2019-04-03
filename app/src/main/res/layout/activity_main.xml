@@ -6,13 +6,41 @@
     android:layout_height="match_parent"
     tools:context="com.example.cz.pikachu3.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.amap.api.maps.MapView
+
+        android:id="@+id/map"
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent">
+
+    </com.amap.api.maps.MapView>
+
+
+    <SearchView
+        android:id="@+id/mySearch"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="60dp"
+        android:inputType="number"></SearchView>
+
+    <ImageButton
+        android:id="@+id/mButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/touming"
+        android:cropToPadding="false"
+        android:scaleType="centerInside"
+        android:src="@drawable/start"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:layout_constraintEnd_toEndOf="@+id/map"
+        app:layout_constraintStart_toStartOf="@+id/map"
+        app:layout_constraintTop_toBottomOf="@+id/mySearch"
+        app:layout_constraintVertical_bias="0.86" />
 
 </android.support.constraint.ConstraintLayout>
