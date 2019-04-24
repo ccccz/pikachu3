@@ -5,14 +5,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.LocationManager;
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SearchView;
 
 import com.amap.api.location.AMapLocation;
@@ -29,16 +33,24 @@ import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Deque;
 import java.util.List;
 import java.util.Stack;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     MapView mMapView = null;
     AMap aMap=null;
     MyLocationStyle myLocationStyle;
     Polyline polyline;
-    Stack<Polyline> polylines=new Stack<>();
+    Deque<Polyline> polylines=new ArrayDeque<>();  //存储本次轨迹记录
     Location mlocation;
     Double lat=0.0;
     Double lon=0.0;
@@ -50,22 +62,30 @@ public class MainActivity extends Activity {
     LatLng latLng;
     int isOK=0;
     Marker marker;
-    ImageButton mButton,updataButton,locaButton;
+    ImageButton mButton, delButton,locaButton,saveButton,hisButton;
     boolean isStart=true,isDraw=false;
     LocationManager locationManager;
     UiSettings uiSettings;
+    ListView listView;
+    MyFile myFile;
+    Bitmap mbitMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initView();
         //获取地图控件引用
         mMapView = (MapView) findViewById(R.id.map);
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
+        myFile=new MyFile();
         mButton=(ImageButton)findViewById(R.id.mButton);
-        updataButton=(ImageButton)findViewById(R.id.updataButton);
+        delButton =(ImageButton)findViewById(R.id.updataButton);
+        saveButton=(ImageButton)findViewById(R.id.saveButton);
+        hisButton=(ImageButton)findViewById(R.id.hisButton);
+        locaButton=(ImageButton)findViewById(R.id.locaButton);
 
         if(aMap==null){
             aMap=mMapView.getMap();
@@ -79,17 +99,6 @@ public class MainActivity extends Activity {
          */
         uiSettings=aMap.getUiSettings();
         uiSettings.setZoomControlsEnabled(false);
-
-        /**
-         * 定位按钮
-         */
-        locaButton=(ImageButton)findViewById(R.id.locaButton);
-        locaButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                aMap.moveCamera(CameraUpdateFactory.changeLatLng(latLng));
-            }
-        });
 
 
         /**
@@ -128,13 +137,38 @@ public class MainActivity extends Activity {
             }
         });
 
-        updataButton.setOnClickListener(new View.OnClickListener() {
+        delButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (polylines!=null){
                     Polyline temp=polylines.pop();
                     temp.remove();
                 }
+            }
+        });
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shotPhoto();
+                myFile.save(polylines,mbitMap);
+            }
+        });
+
+        hisButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        /**
+         * 定位按钮
+         */
+        locaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                aMap.moveCamera(CameraUpdateFactory.changeLatLng(latLng));
             }
         });
 
@@ -205,6 +239,9 @@ public class MainActivity extends Activity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+
+
+                //TODO:待删
                 System.out.println("搜索       "+query);
                 List<LatLng> lll = new ArrayList<LatLng>();
                 lll.add(new LatLng(32.113912,118.953266));
@@ -266,7 +303,17 @@ public class MainActivity extends Activity {
 //        lll.add(new LatLng(32.113082,118.957233));
 //
 //        printLine(lll);
+
+
+        /**
+         * 侧边栏初始化
+         */
+
     }
+
+    /**
+     * Destroy
+     */
 
     @Override
     protected void onDestroy() {
@@ -283,8 +330,9 @@ public class MainActivity extends Activity {
 
     }
 
-
-
+    /**
+     * Resume
+     */
 
     @Override
     protected void onResume() {
@@ -295,6 +343,11 @@ public class MainActivity extends Activity {
         aMap.moveCamera(CameraUpdateFactory.changeLatLng(latLng));
 
     }
+
+    /**
+     * Pause
+     */
+
     @Override
     protected void onPause() {
         System.out.println("PAU");
@@ -302,6 +355,12 @@ public class MainActivity extends Activity {
         //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
         mMapView.onPause();
     }
+
+    /**
+     * SaveInstanceState
+     * @param outState
+     */
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -344,6 +403,75 @@ public class MainActivity extends Activity {
         return polyline;
     }
 
+    /**
+     * 侧边栏初始化
+     */
+    private void initView(){
+        listView=(ListView)findViewById(R.id.mlistView);
+    }
+
+    /**
+     * 截图功能
+     */
+    private void shotPhoto(){
+
+        aMap.getMapScreenShot(new AMap.OnMapScreenShotListener() {
+            @Override
+            public void onMapScreenShot(Bitmap bitmap) {
+
+            }
+
+            @Override
+            public void onMapScreenShot(Bitmap bitmap, int status) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                if(null == bitmap){
+                    return;
+                }
+                try {
+                    File file=new File(Environment.getExternalStorageDirectory() + "/pikapikaimage" + "/test_"
+                            + sdf.format(new Date()) + ".png");
+                    if (!file.exists()){
+                        file.mkdir();
+                    }
+                    FileOutputStream fos = new FileOutputStream(file);
+                    boolean b = bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    mbitMap=bitmap;
+                    //发送广播通知
+                    Uri uri=Uri.fromFile(file);
+                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,uri));
+
+                    try {
+                        fos.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    StringBuffer buffer = new StringBuffer();
+                    if (b)
+                        buffer.append("截屏成功 ");
+                    else {
+                        buffer.append("截屏失败 ");
+                    }
+                    if (status != 0)
+                        buffer.append("地图渲染完成，截屏无网格");
+                    else {
+                        buffer.append( "地图未渲染完成，截屏有网格");
+                    }
+                    System.out.println(buffer.toString());
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
 
 }
 
