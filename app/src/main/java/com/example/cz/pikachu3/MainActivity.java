@@ -1,6 +1,5 @@
 package com.example.cz.pikachu3;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,9 +14,11 @@ import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.SimpleAdapter;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -43,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     MapView mMapView = null;
@@ -69,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     MyFile myFile;
     Bitmap mbitMap;
+    ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        System.out.println("onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
@@ -80,12 +81,13 @@ public class MainActivity extends AppCompatActivity {
         mMapView = (MapView) findViewById(R.id.map);
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
-        myFile=new MyFile();
+        myFile=new MyFile(getApplicationContext());
         mButton=(ImageButton)findViewById(R.id.mButton);
         delButton =(ImageButton)findViewById(R.id.updataButton);
         saveButton=(ImageButton)findViewById(R.id.saveButton);
         hisButton=(ImageButton)findViewById(R.id.hisButton);
         locaButton=(ImageButton)findViewById(R.id.locaButton);
+        mListView=(ListView)findViewById(R.id.mlistView);
 
         if(aMap==null){
             aMap=mMapView.getMap();
@@ -151,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 shotPhoto();
-                myFile.save(polylines,mbitMap);
+                myFile.saveFile(polylines,mbitMap);
             }
         });
 
@@ -225,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
         //隐藏状态栏，导航栏，actionbar
         View decorView=getWindow().getDecorView();
-        int option = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        int option = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE;
         decorView.setSystemUiVisibility(option);
 
         /**
@@ -283,9 +285,9 @@ public class MainActivity extends AppCompatActivity {
 //            startService(intent);
 //        }
 
-/**
- * 关于GPS打开的设置
- */
+        /**
+        * 关于GPS打开的设置
+        */
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         boolean isOK=locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (!isOK){
@@ -306,9 +308,26 @@ public class MainActivity extends AppCompatActivity {
 
 
         /**
-         * 侧边栏初始化
+         * 新建文件夹
          */
+        File temp=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+ "/pikapika" );
+        temp.mkdir();
 
+        /**
+         * ListView适配器
+         */
+        List<Map<String,Object>> mlist=myFile.getfiles();
+        SimpleAdapter simpleAdapter=new SimpleAdapter(this,mlist,R.layout.list_layout,new String[]{"miao"},new int[]{R.id.testText});
+        mListView.setAdapter(simpleAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                List<Map<String,Object>> mlist=myFile.getfiles();
+                Intent intent=new Intent(MainActivity.this,HistoryActivity.class);
+                intent.putExtra("miao",(String) mlist.get(position).get("miao"));
+                startActivity(intent);
+            }
+        });
     }
 
     /**
@@ -428,11 +447,9 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 try {
-                    File file=new File(Environment.getExternalStorageDirectory() + "/pikapikaimage" + "/test_"
+                    File file=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+ "/pikapika" + "/test_"
                             + sdf.format(new Date()) + ".png");
-                    if (!file.exists()){
-                        file.mkdir();
-                    }
+                    System.out.println(Environment.getExternalStorageDirectory().getAbsolutePath()+"*********");
                     FileOutputStream fos = new FileOutputStream(file);
                     boolean b = bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
                     mbitMap=bitmap;

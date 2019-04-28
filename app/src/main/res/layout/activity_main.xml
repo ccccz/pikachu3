@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     tools:context="com.example.cz.pikachu3.MainActivity">
 
-
+    <!--主页-->
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!--地图-->
         <com.amap.api.maps.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
@@ -19,6 +20,7 @@
         </com.amap.api.maps.MapView>
 
 
+        <!--搜索栏-->
         <SearchView
             android:id="@+id/mySearch"
             android:layout_width="match_parent"
@@ -32,6 +34,7 @@
             app:layout_constraintTop_toTopOf="@+id/map"
             app:layout_constraintVertical_bias="0.0" />
 
+        <!--右侧工具栏-->
         <LinearLayout
             android:layout_width="30dp"
             android:layout_height="wrap_content"
@@ -44,6 +47,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.222">
 
+            <!--保存-->
             <ImageButton
                 android:id="@+id/saveButton"
                 android:layout_width="30dp"
@@ -56,6 +60,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/save" />
 
+            <!--清除-->
             <ImageButton
                 android:id="@+id/updataButton"
                 android:layout_width="30dp"
@@ -64,6 +69,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/remove" />
 
+            <!--返回定位点-->
             <ImageButton
                 android:id="@+id/locaButton"
                 android:layout_width="30dp"
@@ -72,6 +78,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/locat" />
 
+            <!--历史-->
             <ImageButton
                 android:id="@+id/hisButton"
                 android:layout_width="30dp"
@@ -83,6 +90,7 @@
 
         </LinearLayout>
 
+        <!--最下跑步栏-->
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="100dp"
@@ -94,6 +102,7 @@
             android:background="@drawable/serach_circle">
 
 
+            <!--开始停止按钮-->
             <ImageButton
                 android:id="@+id/mButton"
                 android:layout_width="80dp"
@@ -114,11 +123,12 @@
     </android.support.constraint.ConstraintLayout>
 
 
+    <!--右侧侧边栏-->
     <ListView
         android:id="@+id/mlistView"
-        android:layout_width="300px"
+        android:layout_width="300dp"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
-        android:background="#123456"/>
+        android:layout_gravity="end"
+        android:background="#FFFFFF"/>
 
 </android.support.v4.widget.DrawerLayout>

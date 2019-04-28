@@ -50,11 +50,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".HistoryActivity">
+
+        </activity>
         <meta-data android:name="com.amap.api.v2.apikey" android:value="17018c3255e1c1d481a4cb4a5a953175">
         </meta-data>
         <service android:name="com.amap.api.location.APSService"/>
-        <service android:name=".MyService"
-            android:enabled="true"/>
         <service android:name=".ForegroundService" android:enabled="true"/>
     </application>
 
