@@ -25,7 +25,6 @@ import com.amap.api.maps.model.PolylineOptions;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -120,8 +119,7 @@ public class HistoryActivity extends Activity{
         mLocationClientOption.setLocationPurpose(AMapLocationClientOption.AMapLocationPurpose.Sport);
         //设置定位模式
         mLocationClientOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
-        mLocationClientOption.setInterval(5000);
-//        mLocationClientOption.setOnceLocation(true);
+        mLocationClientOption.setInterval(2000);
         if (mLocationClient!=null){
             //应用于AMapLocationClient
             mLocationClient.setLocationOption(mLocationClientOption);

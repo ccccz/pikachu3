@@ -47,30 +47,25 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    MapView mMapView = null;
-    AMap aMap=null;
-    MyLocationStyle myLocationStyle;
-    Polyline polyline;
-    Deque<Polyline> polylines=new ArrayDeque<>();  //存储本次轨迹记录
-    Location mlocation;
-    Double lat=0.0;
-    Double lon=0.0;
-    public AMapLocationClient mLocationClient=null;
-    public AMapLocationListener mLocationListener;
-    public AMapLocationClientOption mLocationClientOption=null;  //用于设置发起定位的模式和相关参数
-    private Context appContext;
-    List<LatLng> latLngs=new ArrayList<LatLng>();
-    LatLng latLng;
-    int isOK=0;
-    Marker marker;
-    ImageButton mButton, delButton,locaButton,saveButton,hisButton;
-    boolean isStart=true,isDraw=false;
-    LocationManager locationManager;
-    UiSettings uiSettings;
-    ListView listView;
-    MyFile myFile;
-    Bitmap mbitMap;
-    ListView mListView;
+    private MapView mMapView = null;
+    private AMap aMap=null;
+    private MyLocationStyle myLocationStyle;
+    private Polyline polyline;
+    private Deque<Polyline> polylines=new ArrayDeque<>();  //存储本次轨迹记录
+    private AMapLocationClient mLocationClient=null;
+    private AMapLocationListener mLocationListener;
+    private AMapLocationClientOption mLocationClientOption=null;  //用于设置发起定位的模式和相关参数
+    private List<LatLng> latLngs=new ArrayList<LatLng>();
+    private LatLng latLng;
+    private int isOK=0;
+    private ImageButton mButton, delButton,locaButton,saveButton,hisButton;
+    private boolean isStart=true,isDraw=false;
+    private LocationManager locationManager;
+    private UiSettings uiSettings;
+    private ListView listView;
+    private MyFile myFile;
+    private Bitmap mbitMap;
+    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,32 +84,10 @@ public class MainActivity extends AppCompatActivity {
         locaButton=(ImageButton)findViewById(R.id.locaButton);
         mListView=(ListView)findViewById(R.id.mlistView);
 
-        if(aMap==null){
-            aMap=mMapView.getMap();
-        }
-
-        //设置地图
-        aMap.moveCamera(CameraUpdateFactory.zoomTo(19));
-
         /**
-         * 设置控件样式
+         * 初始化地图
          */
-        uiSettings=aMap.getUiSettings();
-        uiSettings.setZoomControlsEnabled(false);
-
-
-        /**
-         * 定位蓝点
-         */
-
-        myLocationStyle=new MyLocationStyle();
-        myLocationStyle.interval(2000);
-        myLocationStyle.showMyLocation(true);
-        myLocationStyle.strokeWidth(0);
-        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
-        myLocationStyle.radiusFillColor(Color.TRANSPARENT);
-        aMap.setMyLocationStyle(myLocationStyle);
-        aMap.setMyLocationEnabled(true);
+        mapInit();
 
         /**
          * button点击处理
@@ -241,31 +214,7 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
-
-                //TODO:待删
-                System.out.println("搜索       "+query);
-                List<LatLng> lll = new ArrayList<LatLng>();
-                lll.add(new LatLng(32.113912,118.953266));
-                lll.add(new LatLng(32.114384,118.954371));
-                lll.add(new LatLng(32.113144,118.954993));
-                lll.add(new LatLng(32.112726,118.953813));
-                lll.add(new LatLng(32.111563,118.954398));
-                lll.add(new LatLng(32.111985,118.955556));
-
-                printLine(lll);
-
-                lll.clear();
-                lll.add(new LatLng(32.114384,118.954419));
-                lll.add(new LatLng(32.114911,118.955739));
-                lll.add(new LatLng(32.113675,118.956442));
-                lll.add(new LatLng(32.113148,118.954988));
-                lll.add(new LatLng(32.113675,118.956442));
-                lll.add(new LatLng(32.113053,118.957236));
-                lll.add(new LatLng(32.112285,118.956656));
-                lll.add(new LatLng(32.112031,118.955975));
-
-                printLine(lll);
+                //TODO:待写
                 return false;
             }
 
@@ -275,15 +224,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        /***
-//         * 设置服务,状态栏
-//         */
-//        Intent intent=new Intent(this,MyService.class);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForegroundService(intent);
-//        }else{
-//            startService(intent);
-//        }
 
         /**
         * 关于GPS打开的设置
@@ -293,18 +233,6 @@ public class MainActivity extends AppCompatActivity {
         if (!isOK){
             gpsDialog();
         }
-        /**
-         * 测试画线功能，通过
-         */
-
-//        List<LatLng> lll = new ArrayList<LatLng>();
-//        lll.add(new LatLng(32.115456,118.953837));
-//        lll.add(new LatLng(32.114373,118.954379));
-//        lll.add(new LatLng(32.114895,118.955768));
-//        lll.add(new LatLng(32.113687,118.956444));
-//        lll.add(new LatLng(32.113082,118.957233));
-//
-//        printLine(lll);
 
 
         /**
@@ -317,14 +245,15 @@ public class MainActivity extends AppCompatActivity {
          * ListView适配器
          */
         List<Map<String,Object>> mlist=myFile.getfiles();
-        SimpleAdapter simpleAdapter=new SimpleAdapter(this,mlist,R.layout.list_layout,new String[]{"miao"},new int[]{R.id.testText});
+        SimpleAdapter simpleAdapter=new SimpleAdapter(this,mlist,R.layout.list_layout,new String[]{"miao"},new int[]{R.id.listText});
         mListView.setAdapter(simpleAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 List<Map<String,Object>> mlist=myFile.getfiles();
                 Intent intent=new Intent(MainActivity.this,HistoryActivity.class);
-                intent.putExtra("miao",(String) mlist.get(position).get("miao"));
+                String temp=(String) mlist.get(position).get("miao");
+                intent.putExtra("miao",temp.substring(0,temp.length()-5));
                 startActivity(intent);
             }
         });
@@ -490,12 +419,55 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 地图初始化
+     */
+    private void mapInit(){
+
+        //获取aMap
+        if(aMap==null){
+            aMap=mMapView.getMap();
+        }
+
+        //设置地图
+        aMap.moveCamera(CameraUpdateFactory.zoomTo(19));
+
+        /**
+         * 设置控件样式
+         */
+        uiSettings=aMap.getUiSettings();
+        uiSettings.setZoomControlsEnabled(false);
+
+
+        /**
+         * 定位蓝点
+         */
+
+        myLocationStyle=new MyLocationStyle();
+        myLocationStyle.interval(2000);
+        myLocationStyle.showMyLocation(true);
+        myLocationStyle.strokeWidth(0);
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
+        myLocationStyle.radiusFillColor(Color.TRANSPARENT);
+        aMap.setMyLocationStyle(myLocationStyle);
+        aMap.setMyLocationEnabled(true);
+
+    }
 }
 
 
 /**
  * 废弃代码
  */
+//        /***
+//         * 设置服务,状态栏
+//         */
+//        Intent intent=new Intent(this,MyService.class);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(intent);
+//        }else{
+//            startService(intent);
+//        }
 //          /**
  //         * 绘制轨迹
  //         */

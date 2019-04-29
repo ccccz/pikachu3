@@ -52,13 +52,10 @@
                 android:id="@+id/saveButton"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
                 android:background="@drawable/update_circle"
                 android:scaleType="centerInside"
-                android:src="@drawable/save" />
+                android:src="@drawable/save"
+                android:padding="3dp"/>
 
             <!--清除-->
             <ImageButton
@@ -67,7 +64,8 @@
                 android:layout_height="30dp"
                 android:background="@drawable/update_circle"
                 android:scaleType="centerInside"
-                android:src="@drawable/remove" />
+                android:src="@drawable/remove"
+                android:paddingRight="2dp"/>
 
             <!--返回定位点-->
             <ImageButton
@@ -76,7 +74,8 @@
                 android:layout_height="30dp"
                 android:background="@drawable/update_circle"
                 android:scaleType="centerInside"
-                android:src="@drawable/locat" />
+                android:src="@drawable/locat"
+                android:padding="1dp"/>
 
             <!--历史-->
             <ImageButton
